@@ -13,30 +13,31 @@ class Adapter(persist.Adapter):
         self.dynamodb = boto3.client('dynamodb', **kwargs)
         self.dynamodb_resource = boto3.resource('dynamodb', **kwargs)
 
-        try:
+        if 'disable_table_creation' not in kwargs or not kwargs['disable_table_creation']:
+            try:
 
-            self.dynamodb.create_table(
-                TableName=self.table_name,
+                self.dynamodb.create_table(
+                    TableName=self.table_name,
 
-                AttributeDefinitions=[
-                    {
-                        'AttributeName': 'id',
-                        'AttributeType': 'S'
+                    AttributeDefinitions=[
+                        {
+                            'AttributeName': 'id',
+                            'AttributeType': 'S'
+                        }
+                    ],
+                    KeySchema=[
+                        {
+                            'AttributeName': 'id',
+                            'KeyType': 'HASH'
+                        },
+                    ],
+                    ProvisionedThroughput={
+                        'ReadCapacityUnits': 10,
+                        'WriteCapacityUnits': 10
                     }
-                ],
-                KeySchema=[
-                    {
-                        'AttributeName': 'id',
-                        'KeyType': 'HASH'
-                    },
-                ],
-                ProvisionedThroughput={
-                    'ReadCapacityUnits': 10,
-                    'WriteCapacityUnits': 10
-                }
-            )
-        except self.dynamodb.exceptions.ResourceInUseException:
-            pass
+                )
+            except self.dynamodb.exceptions.ResourceInUseException:
+                pass
 
     def update_policy(self, sec, ptype, old_rule, new_rule):
         self.add_policy(sec, ptype, new_rule)
