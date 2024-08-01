@@ -7,13 +7,13 @@ from casbin import persist
 class Adapter(persist.Adapter):
     """the interface for Casbin adapters."""
 
-    def __init__(self, table_name='casbin_rule', **kwargs):
+    def __init__(self, table_name='casbin_rule', disable_table_creation=False, **kwargs):
         """create connection and dynamodb table"""
         self.table_name = table_name
         self.dynamodb = boto3.client('dynamodb', **kwargs)
         self.dynamodb_resource = boto3.resource('dynamodb', **kwargs)
 
-        if 'disable_table_creation' not in kwargs or not kwargs['disable_table_creation']:
+        if not disable_table_creation:
             try:
 
                 self.dynamodb.create_table(
