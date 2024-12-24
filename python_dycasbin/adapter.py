@@ -115,7 +115,9 @@ class Adapter(persist.Adapter):
 
         for i, v in enumerate(rule):
             line['v{}'.format(i)] = {}
-            line['v{}'.format(i)]['S'] = v
+            # converting to string with str() handles StrEnum values better,
+            # e.g. if enum class name changes, the MD5 hash will not change
+            line['v{}'.format(i)]['S'] = str(v)
 
         line['id'] = {}
         line['id']['S'] = self.get_md5(line)
